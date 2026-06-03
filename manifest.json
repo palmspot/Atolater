@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "Watch Later (あとで見る)",
+  "version": "1.2.0",
+  "description": "Set a timer on any tab. When it fires, the tab resurfaces with your reminder note. / タブにタイマーをセット。時間になったら最前面表示＋メモ表示。",
+
+  "permissions": [
+    "tabs",
+    "alarms",
+    "storage",
+    "notifications"
+  ],
+  "host_permissions": ["<all_urls>", "https://api.sendgrid.com/"],
+
+  "background": {
+    "service_worker": "src/background.js",
+    "scripts": ["src/background.js"]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+
+  "icons": {
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "atolater@migimigi.cc",
+      "strict_min_version": "109.0"
+    }
+  }
+}

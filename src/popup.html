@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>あとで見る</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #ffffff;
+    --bg2:       #f5f5f0;
+    --surface:   #ededea;
+    --border:    rgba(0,0,0,0.12);
+    --text:      #1a1a18;
+    --text2:     #5a5a57;
+    --accent:    #534ab7;
+    --accent-bg: #eeedfe;
+    --amber:     #ba7517;
+    --amber-bg:  #faeeda;
+    --danger:    #a32d2d;
+    --danger-bg: #fcebeb;
+    --green:     #3b6d11;
+    --green-bg:  #eaf3de;
+    --radius:    8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:        #1e1e1c;
+      --bg2:       #28281f;
+      --surface:   #323230;
+      --border:    rgba(255,255,255,0.1);
+      --text:      #e8e6dc;
+      --text2:     #9c9a92;
+      --accent:    #afa9ec;
+      --accent-bg: #26215c;
+      --amber:     #ef9f27;
+      --amber-bg:  #412402;
+      --danger:    #f09595;
+      --danger-bg: #501313;
+      --green:     #97c459;
+      --green-bg:  #173404;
+    }
+  }
+
+  body {
+    width: 360px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  header .logo { font-size: 18px; }
+  header h1 { font-size: 15px; font-weight: 600; flex: 1; }
+  header button.settings-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text2); font-size: 16px; padding: 2px 4px;
+    border-radius: 4px;
+  }
+  header button.settings-btn:hover { background: var(--surface); }
+
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .tabs button {
+    flex: 1; background: none; border: none; cursor: pointer;
+    padding: 8px 4px; font-size: 12px; color: var(--text2);
+    border-bottom: 2px solid transparent;
+    transition: color .15s, border-color .15s;
+  }
+  .tabs button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+  .panel { display: none; padding: 14px 16px; }
+  .panel.active { display: block; }
+
+  .current-tab-card {
+    background: var(--accent-bg);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+  .current-tab-card .tab-title {
+    font-weight: 600; font-size: 13px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    color: var(--accent);
+  }
+  .current-tab-card .tab-url {
+    font-size: 11px; color: var(--text2); margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 3px; }
+  .field { margin-bottom: 10px; }
+  input[type=datetime-local],
+  input[type=email],
+  input[type=text],
+  input[type=password],
+  input[type=number],
+  select {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg2);
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  textarea {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg2);
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    resize: vertical;
+    font-family: inherit;
+    transition: border-color .15s;
+  }
+  textarea:focus { border-color: var(--accent); }
+
+  .quick-times {
+    display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px;
+  }
+  .quick-times button {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 3px 10px; font-size: 11px;
+    cursor: pointer; color: var(--text2);
+    transition: background .12s;
+  }
+  .quick-times button:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+
+  .btn-primary {
+    display: block; width: 100%;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius);
+    padding: 9px; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: opacity .15s;
+  }
+  .btn-primary:hover { opacity: .85; }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+  .status {
+    margin-top: 8px; padding: 7px 10px;
+    border-radius: var(--radius); font-size: 12px;
+    display: none;
+  }
+  .status.ok  { background: var(--green-bg); color: var(--green); display: block; }
+  .status.err { background: var(--danger-bg); color: var(--danger); display: block; }
+
+  .schedule-list { list-style: none; }
+  .schedule-list li {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px; margin-bottom: 8px;
+    background: var(--bg2);
+  }
+  .schedule-list .s-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .schedule-list .s-url { font-size: 11px; color: var(--text2); margin: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .schedule-list .s-memo { font-size: 12px; color: var(--text); margin: 3px 0; white-space: pre-wrap; word-break: break-word; }
+  .schedule-list .s-time { font-size: 11px; color: var(--amber); margin-top: 4px; }
+  .schedule-list .s-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .schedule-list button {
+    font-size: 11px; padding: 3px 8px; border-radius: 5px;
+    cursor: pointer; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text2);
+  }
+  .schedule-list button:hover { background: var(--danger-bg); color: var(--danger); border-color: var(--danger); }
+  .schedule-list button.snooze-btn:hover { background: var(--amber-bg); color: var(--amber); border-color: var(--amber); }
+  .empty-list { color: var(--text2); font-size: 12px; text-align: center; padding: 20px 0; }
+
+  .settings-note { font-size: 11px; color: var(--text2); margin-top: 4px; }
+  .snooze-presets { display: flex; gap: 6px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+  .snooze-presets input[type=number] { width: 70px; }
+  .btn-save {
+    background: var(--green-bg); color: var(--green);
+    border: 1px solid var(--green); border-radius: var(--radius);
+    padding: 9px 14px; font-size: 13px; font-weight: 600;
+    cursor: pointer; margin-top: 4px; width: 100%;
+  }
+  .btn-save:hover { opacity: .85; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">⏰</span>
+  <h1>あとで見る</h1>
+  <button class="settings-btn" id="goSettings" title="設定">⚙️</button>
+</header>
+
+<div class="tabs">
+  <button class="active" data-tab="set">タイマー設定</button>
+  <button data-tab="list">一覧</button>
+  <button data-tab="settings">設定</button>
+</div>
+
+<!-- ── SET tab ── -->
+<div class="panel active" id="tab-set">
+  <div class="current-tab-card">
+    <div class="tab-title" id="cur-title">読み込み中…</div>
+    <div class="tab-url"   id="cur-url"></div>
+  </div>
+
+  <div class="field">
+    <label id="lbl-fire-at">通知時刻</label>
+    <input type="datetime-local" id="fire-at">
+  </div>
+
+  <div class="quick-times">
+    <button data-min="5">5分後</button>
+    <button data-min="15">15分後</button>
+    <button data-min="30">30分後</button>
+    <button data-min="60">1時間後</button>
+    <button data-min="120">2時間後</button>
+    <button data-min="480">8時間後</button>
+    <button data-min="1440">明日</button>
+  </div>
+
+  <div class="field">
+    <label id="lbl-memo">やること（省略可）</label>
+    <textarea id="memo" rows="2" placeholder="◯◯を確認する、返信する　など"></textarea>
+  </div>
+
+  <div class="field">
+    <label id="lbl-email">メール送信先（省略可）</label>
+    <input type="email" id="email-to" placeholder="you@example.com">
+  </div>
+
+  <button class="btn-primary" id="btn-set">この時刻にセット</button>
+  <div class="status" id="status-set"></div>
+</div>
+
+<!-- ── LIST tab ── -->
+<div class="panel" id="tab-list">
+  <ul class="schedule-list" id="schedule-list">
+    <li class="empty-list">スケジュールなし</li>
+  </ul>
+</div>
+
+<!-- ── SETTINGS tab ── -->
+<div class="panel" id="tab-settings">
+  <div class="field">
+    <label id="lbl-sgkey">SendGrid APIキー</label>
+    <input type="password" id="s-sgkey" placeholder="SG.xxxxxxxxxxxxxxxxxx">
+    <p class="settings-note">SendGrid → Settings → API Keys で作成（Mail Send権限のみでOK）</p>
+  </div>
+  <div class="field">
+    <label id="lbl-from">送信元メールアドレス</label>
+    <input type="email" id="s-from" placeholder="atolater@example.com">
+    <p class="settings-note">SendGridで認証済みのアドレスを使用してください</p>
+  </div>
+  <div class="field">
+    <label id="lbl-default-email">デフォルト送信先メール</label>
+    <input type="email" id="s-email" placeholder="you@example.com">
+  </div>
+  <div class="field">
+    <label id="lbl-default-min">デフォルト通知時間（分後）</label>
+    <input type="number" id="s-default-min" min="1" max="99999" value="10">
+    <p class="settings-note">ポップアップを開いたときにセットされる初期値</p>
+  </div>
+  <div class="field">
+    <label id="lbl-snooze">スヌーズ選択肢（分）</label>
+    <div class="snooze-presets">
+      <input type="number" id="s-snooze1" min="1" max="9999" value="5">
+      <input type="number" id="s-snooze2" min="1" max="9999" value="15">
+      <input type="number" id="s-snooze3" min="1" max="9999" value="60">
+    </div>
+  </div>
+  <div class="field">
+    <label id="lbl-lang">言語 / Language</label>
+    <select id="s-lang">
+      <option value="auto">Auto (Browser default)</option>
+      <option value="ja">日本語</option>
+      <option value="en">English</option>
+    </select>
+  </div>
+  <button class="btn-save" id="btn-save-settings">保存</button>
+  <div class="status" id="status-settings"></div>
+</div>
+
+<script src="i18n.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>
