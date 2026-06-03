@@ -1,0 +1,11 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# 署名済みxpiファイル（配布物）
+*.xpi
+*.crx
+
+# ローカル開発用
+.env
+*.log

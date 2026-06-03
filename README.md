@@ -1,76 +1,86 @@
-# Watch Later (あとで見る)
+# あとで見る / Watch Later
 
-A Firefox / Chrome browser extension that lets you set a timer on any tab. When the timer fires, the tab comes to the front with an overlay showing your reminder note.
+A browser extension for Firefox and Chrome that lets you set a timer on any tab.  
+When the timer fires, the tab comes to the front with an overlay showing your reminder note.
 
-## Features
+タブにタイマーをセットして、時間になったら最前面表示＋オーバーレイ通知する拡張機能です。
 
-- **Tab timer** — set a time for any tab to resurface
-- **Reminder overlay** — a full-page overlay shows your note when the timer fires
-- **Editable memo on snooze** — edit your reminder note directly in the overlay before snoozing
-- **Title blink** — the tab title blinks so you notice even when on another tab
-- **Snooze** — snooze for 5 / 15 / 60 minutes (configurable)
-- **Email notification** — get an email when the timer fires (via your own SendGrid account)
-- **Closed-tab alert** — if you accidentally close a scheduled tab, an email is sent
-- **Bilingual UI** — Japanese / English, auto-detected from browser language with manual toggle
-- **Firefox + Chrome** — built on WebExtensions MV3, works on both browsers
+![Firefox](https://img.shields.io/badge/Firefox-109%2B-orange)
+![Chrome](https://img.shields.io/badge/Chrome-MV3-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## Installation
+---
 
-### Firefox (temporary / development)
-1. Open `about:debugging` → **This Firefox**
-2. Click **Load Temporary Add-on**
-3. Select `manifest.json` inside the extracted folder
+## Features / 機能
+
+| | EN | JA |
+|---|---|---|
+| ⏰ | Tab timer with custom time | タブへのタイマー設定 |
+| 📋 | Reminder note shown on overlay | やること表示オーバーレイ |
+| 💤 | Snooze (preset + custom datetime) | スヌーズ（プリセット＋日時指定） |
+| ✉️ | Email notification via SendGrid | SendGrid経由のメール通知 |
+| 🔔 | OS notification + tab title blink | OS通知＋タブタイトル点滅 |
+| 🌐 | Japanese / English UI | 日本語・英語切替 |
+| 🔒 | Closed-tab detection | タブを閉じた際のメール通知 |
+
+---
+
+## Installation / インストール
+
+### Firefox
+1. Open `about:debugging` → This Firefox
+2. Click "Load Temporary Add-on"
+3. Select `manifest.json`
 
 ### Chrome / Edge
-1. Open `chrome://extensions` → enable **Developer mode**
-2. Click **Load unpacked**
-3. Select the extracted `atolater/` folder
+1. Open `chrome://extensions` → Enable Developer mode
+2. Click "Load unpacked"
+3. Select the `atolater/` folder
 
-## Email Notifications (optional)
+---
 
-Email notifications use **your own SendGrid account** — no server required.
+## Setup / セットアップ
 
-1. Create a free account at [sendgrid.com](https://sendgrid.com) (100 emails/day free)
-2. Go to **Settings → Sender Authentication** and verify your sender address
-3. Go to **Settings → API Keys** → create a key with **Mail Send** permission only
-4. Open the extension → **Settings tab** → enter your API key, from address, and default recipient
+### Email notifications (optional) / メール通知（任意）
 
-> **Privacy note:** Your SendGrid API key is stored in `browser.storage.local` on your device only. It is never sent anywhere except directly to the SendGrid API when sending a notification email.
+This extension uses **your own SendGrid account** to send emails.  
+No data is sent to any third-party server other than SendGrid.
 
-## Permissions
+1. Create a free account at https://sendgrid.com (100 emails/day free)
+2. Complete **Domain Authentication** for your sender domain
+3. Create an API key with **Mail Send** permission only
+4. Open the extension popup → Settings tab → enter your API key and email addresses
 
-| Permission | Reason |
-|-----------|--------|
-| `tabs` | Read the current tab URL and title; bring a tab to the front when its timer fires |
-| `alarms` | Schedule timers that survive browser sleep |
-| `storage` | Save schedules and settings locally |
-| `notifications` | Show a browser notification when the timer fires |
-| `<all_urls>` | Inject the reminder overlay into any page when its timer fires |
+---
 
-## File Structure
+## File Structure / ファイル構成
 
 ```
 atolater/
-├── manifest.json
+├── manifest.json        # MV3 manifest (Firefox + Chrome)
+├── src/
+│   ├── background.js    # Service worker: alarms, email, tab detection
+│   ├── content.js       # Overlay UI injected into pages
+│   ├── popup.html       # Extension popup
+│   ├── popup.js         # Popup logic
+│   └── i18n.js          # Japanese / English strings
 ├── icons/
 │   ├── icon48.png
 │   └── icon128.png
-└── src/
-    ├── background.js   # Alarm engine, email, tab watcher
-    ├── content.js      # Overlay injected into pages
-    ├── i18n.js         # Bilingual strings (ja / en)
-    ├── popup.html      # Extension popup UI
-    └── popup.js        # Popup logic
+└── server/
+    └── send-mail.php    # Optional self-hosted mail API (not required)
 ```
 
-## Privacy Policy
+---
 
-This extension does not collect, transmit, or share any personal data.
+## Privacy / プライバシー
 
-- All schedules and settings are stored locally in your browser (`browser.storage.local`)
-- If you configure SendGrid email notifications, your API key is stored locally and used only to call the SendGrid API directly from your browser
-- No analytics, no tracking, no external servers owned by this extension
+- All settings (API key, email addresses) are stored in **browser local storage only**
+- No data is collected or sent to any server operated by this extension
+- Email notifications are sent directly from your browser to **SendGrid's API** using your own API key
+
+---
 
 ## License
 
-MIT
+MIT License — see [LICENSE](LICENSE)
